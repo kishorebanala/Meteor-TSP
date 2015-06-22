@@ -1,0 +1,17 @@
+<template name="leaderboard">
+    <ol class="leaderboard">
+        {{#each cities}}
+            {{> city}}
+        {{/each}}
+    </ol>
+
+    <form class="new-task">
+        <button class="add">+</button>
+        <input type="text" name="text" placeholder="Enter City name or Zipcode" />
+    </form>
+
+    <div class="submit">
+        <button class="request">Find Optimal Route</button>
+    </div>
+
+</template>
