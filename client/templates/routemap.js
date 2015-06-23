@@ -6,7 +6,7 @@ Template.routemap.helpers({
             console.log("Map Loaded.");
             var mapOptions = {
                 center: new google.maps.LatLng(38.9687099, -92.095297),
-                zoom: 8
+                zoom: 6
             };
             return mapOptions;
         }
@@ -21,7 +21,8 @@ Template.routemap.onCreated(function () {
 
 
         var routePlanCoordinates = cityCoordinates(); // Get Lat Long coordinates from mongoDB.
-        var routePlan = new google.maps.Polyline({
+        addMarkers(routePlanCoordinates, map);             // Add Markers.
+        var routePlan = new google.maps.Polyline({    // Draw poly lines.
             path: routePlanCoordinates,
             geodesic: true,
             strokeColor: '#0066FF',
@@ -37,6 +38,21 @@ Template.routemap.onCreated(function () {
             map: map.instance
         });*/
     });
+
+    function addMarkers(routePlanCoordinates, map){
+        for(i = 0; i < routePlanCoordinates.length; i++) {
+            var image = new google.maps.MarkerImage('img/marker' + i + '.png',
+                new google.maps.Size(20, 34),
+                new google.maps.Point(0, 0),
+                new google.maps.Point(10, 34));
+
+            var marker = new google.maps.Marker({
+                position: routePlanCoordinates[i],
+                map: map.instance,
+                icon: image
+            });
+        }
+    }
 
     function cityCoordinates(){
         var coordinates = [];
