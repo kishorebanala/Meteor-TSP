@@ -23,7 +23,6 @@ Template.leaderboard.events({
         }
 
         var formattedCityJson;
-        var formattedCity;
 
         //TODO Change error throwing mechanism for false requests.
         Meteor.call('fetchFromService', text, function (err, respJson) {
@@ -34,18 +33,18 @@ Template.leaderboard.events({
                 console.log("respJson: ", respJson);
 
                 if(respJson.status == "OK") {
-                    formattedCityJson = respJson;
-                    formattedCity = formattedCityJson.results[0].formatted_address;
+                    formattedCityJson = respJson.results[0]; // Get first array of results. Ignore others as of now.
 
                     Cities.insert({
-                        name: formattedCity,
+                        name: formattedCityJson.formatted_address,
+                        latitude: formattedCityJson.geometry.location.lat,
+                        longitude: formattedCityJson.geometry.location.lng,
                         createdAt: new Date() // current time
                     });
                 }
                 else{
                     window.alert("Invalid City name/code. ");
                 }
-                console.log("formatted City: ", formattedCity);
             }
         });
 
@@ -61,17 +60,13 @@ Template.leaderboard.events({
 
         console.log("Button Clicked");
 
-        if(Cities.length < 1){
+        /*if(Cities.length < 1){
             // TODO Set error message.
+            console.log("No Cities given.");
             return;
-        }
+        }*/
 
         // TODO go to map.
         Router.go('/routemap');
-
-        // Get all Cities names.
-        var citiesReq = Cities.find(
-
-        )
     }
 });
