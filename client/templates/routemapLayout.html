@@ -9,8 +9,16 @@
         <div class="logo"></div>
         <h1 class="title">Route Optimizer</h1>
         <div class="subtitle">with Travelling Salesman Problem</div>
-        {{> routemap}}
-
+    </div>
+    <div class="mymaps">
+        <div id="leftmap">
+            <h1>Inital Route</h1>
+            {{> initialroute}}
+        </div>
+        <div id="rightmap">
+            <h2>Optimized Route</h2>
+            {{> optimizedroute}}
+        </div>
     </div>
     </body>
 </template>

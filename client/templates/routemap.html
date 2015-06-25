@@ -1,16 +1,17 @@
-<template name="routemap">
+<template name="initialroute">
     <body>
-    <div class="routemapcontainer">
-        {{> googleMap name="googleroutemap" options=googleRouteMapOptions}}
+    <div id="routemapcontainer">
+        {{> googleMap name="initialroutemap" options=initialRouteMapOptions}}
     </div>
     </body>
 </template>
 
-<!--<div class="mymaps">
-    <div id="map1">
-        {{> routemap}}
+<template name="optimizedroute">
+    <body>
+    <div id="routemapcontainer">
+        {{> googleMap name="optimizedroutemap" options=optimizedRouteMapOptions}}
     </div>
-    <div id="map2">
-        {{> routemap}}
-    </div>
-</div>-->
+    </body>
+</template>
+
+

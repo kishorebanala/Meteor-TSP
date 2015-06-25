@@ -16,13 +16,6 @@ body {
     max-width: 480px;
 }
 
-.outer-left {
-    margin: 0 auto;
-    float: left;
-    width: 25%;
-    max-width: 480px;
-}
-
 .logo {
     background: url('data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0ZWQgYnkgSWNvTW9vbi5pbyAtLT4KPCFET0NUWVBFIHN2ZyBQVUJMSUMgIi0vL1czQy8vRFREIFNWRyAxLjEvL0VOIiAiaHR0cDovL3d3dy53My5vcmcvR3JhcGhpY3MvU1ZHLzEuMS9EVEQvc3ZnMTEuZHRkIj4KPHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgdmlld0JveD0iMCAwIDMyIDMyIj4KPGcgaWQ9Imljb21vb24taWdub3JlIj4KCTxsaW5lIHN0cm9rZS13aWR0aD0iMSIgeDE9IiIgeTE9IiIgeDI9IiIgeTI9IiIgc3Ryb2tlPSIjNDQ5RkRCIiBvcGFjaXR5PSIiPjwvbGluZT4KPC9nPgoJPHBhdGggZD0iTTI2LjUyIDI0LjcwNWwtNi41Mi0xMS4yOTN2LTcuODc3aDAuNzVjMC42OSAwIDEuMjUtMC41NiAxLjI1LTEuMjVzLTAuNTYtMS4yNS0xLjI1LTEuMjVoLTkuNWMtMC42OSAwLTEuMjUgMC41Ni0xLjI1IDEuMjVzMC41NiAxLjI1IDEuMjUgMS4yNWgwLjc1djcuODc3bC02LjUyIDExLjI5M2MtMS4zNzUgMi4zODEtMC4yNSA0LjMzIDIuNSA0LjMzaDE2LjA0MGMyLjc1IDAgMy44NzUtMS45NDkgMi41LTQuMzN6TTE0LjUgNS41MzVoM2wtMC4wMDIgOC41NDMgMS45OTYgMy40NTdoLTYuOTljMS4xMjMtMS45NDYgMS45OTYtMy40NTkgMS45OTYtMy40NTl2LTguNTQxek0yNC4wMjAgMjYuNTM1aC0xNi4wNDBjLTAuMjU5IDAtMC40NDMtMC4wMzAtMC41NjEtMC4wNjMgMC4wMzEtMC4xMTkgMC4wOTctMC4yOTQgMC4yMjctMC41MTggMCAwIDEuNzA2LTIuOTU3IDMuNDE2LTUuOTJsOS44NzYtMCAzLjQxOCA1LjkyYzAuMTI5IDAuMjI0IDAuMTk1IDAuMzk5IDAuMjI3IDAuNTE4LTAuMTE4IDAuMDMyLTAuMzAzIDAuMDYzLTAuNTYyIDAuMDYzeiIgZmlsbD0iIzAwMDAwMCI+PC9wYXRoPgo8L3N2Zz4K');
     background-position: center center;
@@ -200,26 +193,32 @@ body {
     text-decoration: none;
 }
 
-.routemapcontainer {
-    width: 100%
-    float: right;
-    height: 500px;
-}
-
 .mymaps{
-    margin-left: 10%;
-    margin-right: 10%;
 }
 
-.mymaps #map1{
+.mymaps #leftmap {
+    margin: 4%;
     float: left;
-    width: 100%
+    width: 42%;
+    height: 500px;
+    border: 0px solid;
+}
+
+.mymaps #rightmap {
+    margin: 4%;
+    float: left;
+    width: 42%;
+    height: 500px;
+    border: 0px solid;
+}
+
+.mymaps #rightmap #routemapcontainer{
+    width: 100%;
     height: 500px;
 }
 
-.mymaps #map2{
-    float: right;
-    width: 100%
+.mymaps #leftmap #routemapcontainer{
+    width: 100%;
     height: 500px;
 }
 

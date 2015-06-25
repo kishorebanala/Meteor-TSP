@@ -2,10 +2,17 @@
  *
  * Created by Kishore on 6/20/2015.
  */
+Meteor.startup(function(){
+    // Initialize Counter to zero. This is used to add auto-incrementing id numbers to collections.
+    Counter.insert({
+        locid: "loc_id",
+        seq: 0
+    })
+})
 
 Template.leaderboard.helpers({
     cities: function () {
-        return Cities.find({}, {sort: {createdAt: -1}});
+        return Cities.find({}, {sort: {createdAt: 1}});
     }
 });
 
@@ -25,13 +32,11 @@ Template.leaderboard.events({
         var formattedCityJson;
 
         //TODO Change error throwing mechanism for false requests.
-        Meteor.call('fetchFromService', text, function (err, respJson) {
+        Meteor.call('fetchFromGoogleMapsAPI', text, function (err, respJson) {
             if (err) {
                 window.alert("Error: " + err.reason);
                 console.log("error occured on receiving data on server. ", err);
             } else {
-                console.log("respJson: ", respJson);
-
                 if(respJson.status == "OK") {
                     formattedCityJson = respJson.results[0]; // Get first array of results. Ignore others as of now.
 
@@ -70,3 +75,15 @@ Template.leaderboard.events({
         Router.go('/routemap');
     }
 });
+/*
+ * Get the incrementing Id number for each location added. This is required to track cities while shuffling.
+ */
+function getNextSequenceNumber(loc_name){
+    Counter.update(loc_name, {$inc: {seq: 1}});
+
+    var ret = Counter.find("seq");
+
+    console.log(ret);
+
+    return ret.seq;
+}

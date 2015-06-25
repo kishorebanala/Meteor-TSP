@@ -9,5 +9,5 @@ autopublish
 insecure
 iron:router
 http
-mrt:googlemaps
 dburles:google-maps
+rubaxa:sortable

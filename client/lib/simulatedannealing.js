@@ -14,24 +14,26 @@ while(temperature > absTemperature){
     temperature *= coolingRate;
 }
 */
-
+function simulatedannealing() {
     var temperature = 10000; // Change to number of cities times a constant.
     var coolingRate = 0.999; // Determine this too from number of cities.
     var absoluteTemperature = 0.001; // Temperature we would like the system to cool down to.
 
-    while(temperature > absoluteTemperature){
+    while (temperature > absoluteTemperature) {
         /*
          * Loop until system cools down (comes down to absoluteTemperature), at very slow rate (Annealing).
          */
 
+
+
         temperature *= coolingRate;
     }
-
+}
 
 
 /*
 TODO Load next random map to calling function, using lazy loading, recursively.
-Algorithm: randomNextState (s)
+Algorithm: Fisher - Yates Random Shuffle.
 Input: a tour s, an array of integers
 
 Next Route: Swap two cities (except start and end) in the route, recursively.
@@ -40,14 +42,22 @@ Output: a tour
 
 */
     function nextRandomRoute(initialRoute){
-        var nextRoute = {};
-        var start = initialRoute[0];
-        var destination = initialRoute[initialRoute.length];
-        nextRoute = initialRoute.subarray(1, initialRoute.length); // Check declaration.
+        var i = initialRoute.length,
+            j = 0,
+            temp;
 
-        // Swap two cities
+        while (i--) {
 
-        return nextRoute;
+            j = Math.floor(Math.random() * (i+1));
+
+            // swap randomly chosen element with current element
+            temp = initialRoute[i];
+            initialRoute[i] = initialRoute[j];
+            initialRoute[j] = temp;
+
+        }
+
+        return initialRoute;
     }
 
 /*
@@ -114,22 +124,26 @@ Getting values out of matrix:
     eg: {(A, 1), (B,2), (C,3)}
 Distance from B -> C = Matrix[2][3] or Matrix[B][C]*/
 
+    getDistanceMatrix = function (locationsQuery) {
+        // TODO Add to mongoDB collections?
+        var distanceMatrix;
 
-    function costMatrix(cities){
-        // Use Google Distance API to calculate distances.
-        var numberofcities = cities.length;
-        var matrix = new Array(numberofcities, numberofcities);
-        for(i=0; i < numberofcities; i++){
-            for(j=0; j < numberofcities; j++){
-                // TODO Check declaration.
-                // TODO Check for better time complex method.
-                matrix[i][j] = matrix[j][i] = distance(cities[i], cities[j]);
+        // Use OSRM Distance API to compute distance matrix.
+        Meteor.call('fetchFromOSRMDistanceAPI', locationsQuery, function (err, respJson) {
+            if (err) {
+                window.alert("Error: " + err.reason);
+                console.log("error occured on receiving data on fetchFromOSRMDistanceAPI. ", err);
+            } else {
+                console.log("respJson: ", respJson);
+                distanceMatrix = respJson.distance_table;
             }
-        }
-    }
+        });
+        Session.set("distanceMatrixKey", distanceMatrix); // Keep distanceMatrix in the session, as we might need it again.
+        return distanceMatrix;
+    };
 
     function distance(city1, city2){
-        // Use google maps api to calculate distance.
-
-        return 0;
+        var distanceMatrix  = Session.get("distanceMatrixKey");
+        // TODO Check numberic values of city1 and city2;
+        return distanceMatrix[city1][city2];
     }
