@@ -6,12 +6,6 @@ Meteor.methods({
     fetchFromOSRMDistanceAPI: function(query) {
         console.log("fetchFromOSRMDistanceAPI method called");
         var endpoint = "http://router.project-osrm.org/table?"; // End point for OSRM Distance API.
-        /*var query = "";
-
-        // TODO perform optimization for queries greater than n locations.
-        for(i = 0; i < locationsArray.length; i++){
-            query += "&loc=" + locationsArray[i].latitude + "," + locationsArray[i].longitude;
-        }*/
 
         var url = endpoint + query;
 

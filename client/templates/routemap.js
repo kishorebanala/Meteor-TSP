@@ -19,7 +19,7 @@ Template.initialroute.onCreated(function () {
         console.log("Google Maps is ready.");
 
         // Fetch data from MongoDB.
-        var citiesArray = Cities.find({}, {sort: {createdAt : -1}}).fetch();
+        var citiesArray = Cities.find({}, {sort: {pos : 1}}).fetch();
 
         var routePlanCoordinates = cityCoordinates(citiesArray); // Get Lat Long coordinates from mongoDB.
         addMarkers(routePlanCoordinates, map);             // Add Markers.
@@ -58,15 +58,7 @@ Template.optimizedroute.onCreated(function () {
         console.log("Google Maps is ready.");
 
         // Fetch data from MongoDB.
-        var citiesArray = Cities.find({}, {sort: {createdAt : -1}}).fetch();
-        var temp1 = "loc=" + citiesArray[0].latitude + "," + citiesArray[0].longitude;
-        var temp2 = temp1 + "&loc=" + citiesArray[1].latitude + "," + citiesArray[1].longitude;
-
-        console.log("temp: " + temp2);
-
-        // TODO Debug only, remove later.
-        var distanceMatrixArray = getDistanceMatrix(temp2);
-        console.log(distanceMatrixArray);
+        var citiesArray = Cities.find({}, {sort: {pos : 1}}).fetch();
 
         var routePlanCoordinates = cityCoordinates(citiesArray); // Get Lat Long coordinates from mongoDB.
         addMarkers(routePlanCoordinates, map);        // Add Markers.

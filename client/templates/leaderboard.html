@@ -1,17 +1,20 @@
 <template name="leaderboard">
     <ol class="leaderboard">
-        {{#each cities}}
+        {{#sortable items = cities options = locationsSortableOptions}}
             {{> city}}
-        {{/each}}
+        {{/sortable}}
     </ol>
 
-    <form class="new-task">
-        <button class="add">+</button>
-        <input type="text" name="text" placeholder="Enter City name or Zipcode" />
+    <form class="new-location">
+        <input type="text" name="text" id="textbox" placeholder="Enter Location name or Zipcode" />
+        <button id="add">+</button>
     </form>
 
     <div class="submit">
         <button class="request">Find Optimal Route</button>
     </div>
+
+    <!-- Initialize s-alert package.-->
+    {{> sAlert}}
 
 </template>

@@ -2,31 +2,46 @@
  *
  * Created by Kishore on 6/20/2015.
  */
-Meteor.startup(function(){
-    // Initialize Counter to zero. This is used to add auto-incrementing id numbers to collections.
-    Counter.insert({
-        locid: "loc_id",
-        seq: 0
-    })
-})
 
 Template.leaderboard.helpers({
     cities: function () {
-        return Cities.find({}, {sort: {createdAt: 1}});
+        return Cities.find({}, {sort: {pos: 1}});
+    },
+    locationsSortableOptions: {
+        sortField: 'pos', // Should be specified, defaults to 'order'.
+        group: {
+            name: 'typeDefinition',
+            put: true     // Allow adding new elements.
+        },
+        // event handler for reordering attributes
+        onSort: function (event) {
+            console.log('Item %s went from #%d to #%d',
+                event.data.name, event.oldIndex, event.newIndex
+            );
+        }
     }
 });
 
 Template.leaderboard.events({
     "click .delete": function () {
-        Cities.remove(this._id);
+        var curCitiesCount = Cities.find({}, {sort: {pos: 1}}).count();
+        if (curCitiesCount < 2) {
+            // TODO change to pop-up alert.
+            sAlert.error('Cannot delete, Add at least two items to compute route.', {effect: 'genie', position: 'top-right', timeout: '3000', onRouteClose: false, stack: false, offset: '80px'});
+            console.log("Cannot delete, Add at least two items to compute route.");
+            return;
+        }
+        Meteor.call('updateCollectionOnDelete', 'cities', this);
+        //Cities.remove(this._id);
     },
 
-    "submit .new-task": function (event) {
+    "submit .new-location": function (event) {
         // This function is called when the new task form is submitted
         var text = event.target.text.value;
 
         if (text == "" || text == null) {
-            return;
+            sAlert.error('Location name/code cannot be empty.', {effect: 'genie', position: 'top-right', timeout: '3000', onRouteClose: false, stack: false, offset: '80px'});
+            return false;
         }
 
         var formattedCityJson;
@@ -34,21 +49,32 @@ Template.leaderboard.events({
         //TODO Change error throwing mechanism for false requests.
         Meteor.call('fetchFromGoogleMapsAPI', text, function (err, respJson) {
             if (err) {
-                window.alert("Error: " + err.reason);
+                var reason = "Error: " + err.reason;
+                sAlert.error(reason, {effect: 'genie', position: 'top-right', timeout: '3000', onRouteClose: false, stack: false, offset: '80px'});
                 console.log("error occured on receiving data on server. ", err);
             } else {
                 if(respJson.status == "OK") {
                     formattedCityJson = respJson.results[0]; // Get first array of results. Ignore others as of now.
+                    /*
+                     * Get last element from the collection, and append its position number by 1.
+                     * This works, as there is at least one element in the collection, all the time.
+                     * Though its not optimal to query db for adding each field, this works best in this instance,
+                     * as the number of cities added will usually be in the range of [3 - 100] most of the time,
+                     * and it doesn't has to wait on others for events.
+                     */
+                    var newPos = Cities.findOne({}, {sort: {pos: -1}});
 
+                    // Insert into collection.
                     Cities.insert({
                         name: formattedCityJson.formatted_address,
                         latitude: formattedCityJson.geometry.location.lat,
                         longitude: formattedCityJson.geometry.location.lng,
-                        createdAt: new Date() // current time
+                        pos: (newPos.pos + 1)
                     });
                 }
                 else{
-                    window.alert("Invalid City name/code. ");
+                    // TODO Change to pop-up alert.
+                    sAlert.error('Invalid location name/code.', {effect: 'genie', position: 'top-right', timeout: '3000', onRouteClose: false, stack: false, offset: '80px'});
                 }
             }
         });
@@ -65,13 +91,13 @@ Template.leaderboard.events({
 
         console.log("Button Clicked");
 
-        /*if(Cities.length < 1){
-            // TODO Set error message.
-            console.log("No Cities given.");
+        // TODO set message of console in dom.
+        if(Cities.find().count() < 2){
+            sAlert.error('Enter at least two locations to compute route.', {effect: 'genie', position: 'top-right', timeout: '3000', onRouteClose: false, stack: false, offset: '80px'});
             return;
-        }*/
+        }
 
-        // TODO go to map.
+        // go to route map page.
         Router.go('/routemap');
     }
 });

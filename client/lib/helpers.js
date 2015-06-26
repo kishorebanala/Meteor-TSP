@@ -10,6 +10,16 @@ Meteor.startup(function () {
         key: 'AIzaSyBCyHWSJ7wuGGCPHfc9zMJ0Iv-uhJ21iHo',
         libraries: 'geometry,places'
     });
+
+    sAlert.config({
+        effect: '',
+        position: 'top',
+        timeout: 5000,
+        html: false,
+        onRouteClose: true,
+        stack: true,
+        offset: 0
+    });
 });
 
 // Route to URLs using Iron - Router

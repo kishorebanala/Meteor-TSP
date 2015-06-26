@@ -16,7 +16,7 @@ body {
     max-width: 480px;
 }
 
-.logo {
+/*.logo {
     background: url('data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0ZWQgYnkgSWNvTW9vbi5pbyAtLT4KPCFET0NUWVBFIHN2ZyBQVUJMSUMgIi0vL1czQy8vRFREIFNWRyAxLjEvL0VOIiAiaHR0cDovL3d3dy53My5vcmcvR3JhcGhpY3MvU1ZHLzEuMS9EVEQvc3ZnMTEuZHRkIj4KPHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgdmlld0JveD0iMCAwIDMyIDMyIj4KPGcgaWQ9Imljb21vb24taWdub3JlIj4KCTxsaW5lIHN0cm9rZS13aWR0aD0iMSIgeDE9IiIgeTE9IiIgeDI9IiIgeTI9IiIgc3Ryb2tlPSIjNDQ5RkRCIiBvcGFjaXR5PSIiPjwvbGluZT4KPC9nPgoJPHBhdGggZD0iTTI2LjUyIDI0LjcwNWwtNi41Mi0xMS4yOTN2LTcuODc3aDAuNzVjMC42OSAwIDEuMjUtMC41NiAxLjI1LTEuMjVzLTAuNTYtMS4yNS0xLjI1LTEuMjVoLTkuNWMtMC42OSAwLTEuMjUgMC41Ni0xLjI1IDEuMjVzMC41NiAxLjI1IDEuMjUgMS4yNWgwLjc1djcuODc3bC02LjUyIDExLjI5M2MtMS4zNzUgMi4zODEtMC4yNSA0LjMzIDIuNSA0LjMzaDE2LjA0MGMyLjc1IDAgMy44NzUtMS45NDkgMi41LTQuMzN6TTE0LjUgNS41MzVoM2wtMC4wMDIgOC41NDMgMS45OTYgMy40NTdoLTYuOTljMS4xMjMtMS45NDYgMS45OTYtMy40NTkgMS45OTYtMy40NTl2LTguNTQxek0yNC4wMjAgMjYuNTM1aC0xNi4wNDBjLTAuMjU5IDAtMC40NDMtMC4wMzAtMC41NjEtMC4wNjMgMC4wMzEtMC4xMTkgMC4wOTctMC4yOTQgMC4yMjctMC41MTggMCAwIDEuNzA2LTIuOTU3IDMuNDE2LTUuOTJsOS44NzYtMCAzLjQxOCA1LjkyYzAuMTI5IDAuMjI0IDAuMTk1IDAuMzk5IDAuMjI3IDAuNTE4LTAuMTE4IDAuMDMyLTAuMzAzIDAuMDYzLTAuNTYyIDAuMDYzeiIgZmlsbD0iIzAwMDAwMCI+PC9wYXRoPgo8L3N2Zz4K');
     background-position: center center;
     background-repeat: no-repeat;
@@ -24,7 +24,7 @@ body {
     height: 1.5em;
     margin: 0 auto .75em;
     width: 1.5em;
-}
+}*/
 
 .title {
     font-size: 1.5em;
@@ -44,7 +44,8 @@ body {
 }
 
 .leaderboard {
-    border-top: 1px solid #f1f1f1;
+    border-top: 1px solid #A3C2FF;
+    background-color: #E0EBFF;
     counter-reset: ol-counter;
     list-style-type: none;
     margin: 0 0 1.5em;
@@ -52,19 +53,24 @@ body {
 }
 
 .city {
-    border-bottom: 1px solid #f1f1f1;
+    border-bottom: 1px solid #A3C2FF;
     cursor: pointer;
     padding: .5em 0;
     position: relative;
     overflow: hidden;
     transition: background 300ms ease-out;
-    border-left: 4px solid white;
+    border-left: 4px solid #FF8080;
 }
 
 .city:before {
     color: #999;
     content: counter(ol-counter);
     counter-increment: ol-counter;
+    /* TODO add map icons.
+    list-style-position: inside;
+    background-image: url("img/marker1.png");
+    background-repeat: no-repeat;
+    padding-left: 7px;*/
     display: inline-block;
     font-weight: 300;
     line-height: 3em;
@@ -82,7 +88,7 @@ body {
 .city .name {
     display: inline-block;
     font-size: 1.25em;
-    font-weight: 300;
+    font-weight: 400;
     vertical-align: middle;
 }
 
@@ -97,58 +103,18 @@ body {
 }
 
 .city.selected {
-    background-color: #fefff4;
-    border-left: #eb5f3a 4px solid;
+    background-color: #B2CCFF;
+    border-left: #E60000 4px solid;
+    cursor: move;
 }
 
 .city:hover {
-    background-color: #fefff4;
+    background-color: #B2CCFF;
+    border-left: #E60000 4px solid;
+    cursor: move;
 }
 
-.new-task {
-    border-left: 5px solid white;
-    display: inline;
-}
-
-.new-task input {
-    box-sizing: border-box;
-    padding: 10px 0;
-    background: transparent;
-    border: none;
-    padding-right: 80px;
-    font-size: 1em;
-}
-
-.new-task input:focus{
-    outline: 0;
-}
-
-.new-task .add {
-    border-radius: 3em;
-    border: #eb5f3a 1px solid;
-    background: transparent;
-    color: #eb5f3a;
-    cursor: pointer;
-    float: left;
-    font-family: 'Source Sans Pro' ,'Helvetica Neue', Helvetica, Arial, sans-serif;
-    font-size: 1rem;
-    line-height: 1;
-    margin: 5px;
-    outline: none;
-    padding: 6px 8px;
-    transition: all 200ms ease-in;
-}
-
-.new-task .add:hover {
-    background: #eb5f3a;
-    color: #fff;
-}
-
-.new-task .add:active {
-    box-shadow: rgba(0,0,0,.3) 0 1px 3px 0 inset;
-}
-
-.delete {
+.city .delete {
     float: right;
     font-weight: bold;
     background: none;
@@ -157,40 +123,87 @@ body {
     position: relative;
 }
 
-.submit {
-    margin-left: 30%;
-    margin-right: 20%;
-    padding: 15px;
+.new-location {
+    margin: 2px;
 }
 
-.request {
-    background: #ffffff;
-    background-image: -webkit-linear-gradient(top, #ffffff, #dbdbdb);
-    background-image: -moz-linear-gradient(top, #ffffff, #dbdbdb);
-    background-image: -ms-linear-gradient(top, #ffffff, #dbdbdb);
-    background-image: -o-linear-gradient(top, #ffffff, #dbdbdb);
-    background-image: linear-gradient(to bottom, #ffffff, #dbdbdb);
-    -webkit-border-radius: 23;
-    -moz-border-radius: 23;
-    border-radius: 23px;
+.new-location #textbox[type='text'] {
+    width: 78%;
+    font-family: "Roboto", "Droid Sans", sans-serif;
+    font-size: 16px;
+    padding: 8px 8px 6px 8px;
+    margin-right: 2px;
+    position: relative;
+    float: left;
+    display: block;
+    outline: none;
+    border: none;
+    overflow:hidden;
+    background: bottom left linear-gradient(#a9a9a9, #a9a9a9) no-repeat, bottom center linear-gradient(#a9a9a9, #a9a9a9) repeat-x, bottom right linear-gradient(#a9a9a9, #a9a9a9) no-repeat;
+    background-size: 1px 6px, 1px 1px, 1px 6px;
+}
+.new-location #textbox[type='text']:hover, #textbox[type='text']:focus {
+    background: bottom left linear-gradient(#0099cc, #0099cc) no-repeat, bottom center linear-gradient(#0099cc, #0099cc) repeat-x, bottom right linear-gradient(#0099cc, #0099cc) no-repeat;
+    background-size: 1px 6px, 1px 1px, 1px 6px;
+}
+
+.new-location #add {
+    width: 20%;
+    border-radius: 3em;
+    border: #FF6666 1.5px solid;
+    background: transparent;
+    color: #FF6666;
+    cursor: pointer;
+    float: right;
     font-family: 'Source Sans Pro' ,'Helvetica Neue', Helvetica, Arial, sans-serif;
-    font-size: 1rem;
+    font-size: 1.2rem;
     font-weight: bold;
-    color: #a82a2a;
-    font-size: 20px;
-    padding: 10px 20px 10px 20px;
-    border: solid #eda5a5 2px;
-    text-decoration: none;
+    line-height: 1;
+    margin: 2px;
+    outline: none;
+    padding: 4px 6px;
+    transition: all 200ms ease-in;
+    position: relative;
+    overflow:hidden;
 }
 
-.request:hover {
-    background: #ed9f9f;
-    background-image: -webkit-linear-gradient(top, #ed9f9f, #ed5c5c);
-    background-image: -moz-linear-gradient(top, #ed9f9f, #ed5c5c);
-    background-image: -ms-linear-gradient(top, #ed9f9f, #ed5c5c);
-    background-image: -o-linear-gradient(top, #ed9f9f, #ed5c5c);
-    background-image: linear-gradient(to bottom, #ed9f9f, #ed5c5c);
-    text-decoration: none;
+.new-location #add:hover {
+    background: #eb5f3a;
+    color: #fff;
+}
+
+.new-location #add:active {
+    box-shadow: rgba(0,0,0,.3) 0 1px 3px 0 inset;
+}
+
+.submit {
+
+}
+
+.submit .request {
+    border-radius: 3em;
+    border: #FF6666 1.5px solid;
+    /* TODO Confirm submit button color.*/
+    background: #ffffff;
+    color: #FF6666;
+    cursor: pointer;
+    width: 80%;
+    margin-left: 10%;
+    margin-right: 10%;
+    margin-top: 8px;
+    font-family: 'Source Sans Pro' ,'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 1.2rem;
+    font-weight: bold;
+    line-height: 1;
+    outline: none;
+    padding: 15px 55px;
+    transition: all 200ms ease-in;
+    overflow:hidden;
+}
+
+.submit .request:hover, .request:active {
+    background: #E65C5C;
+    color: #ffffff;
 }
 
 .mymaps{
@@ -243,7 +256,7 @@ body {
         padding: 10px 20px;
     }
 
-    .new-task input {
+    .new-location input {
         padding-bottom: 5px;
     }
 
