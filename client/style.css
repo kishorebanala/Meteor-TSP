@@ -13,6 +13,8 @@ body {
 
 .outer {
     margin: 0 auto;
+    /*TODO Check top margin in prod. */
+    margin-top: -25px;
     max-width: 480px;
 }
 
@@ -116,11 +118,17 @@ body {
 
 .city .delete {
     float: right;
-    font-weight: bold;
+    font-weight: 400;
     background: none;
     font-size: 1em;
     border: none;
     position: relative;
+    padding: 15px 8px;
+}
+
+.city .delete:hover {
+    font-weight: 700;
+    cursor: pointer;
 }
 
 .new-location {
@@ -206,33 +214,27 @@ body {
     color: #ffffff;
 }
 
-.mymaps{
-}
-
-.mymaps #leftmap {
+.routemaplayout #routemapcontainer{
+    width: 92%;
+    height: 500px;
     margin: 4%;
-    float: left;
-    width: 42%;
-    height: 500px;
-    border: 0px solid;
 }
 
-.mymaps #rightmap {
-    margin: 4%;
-    float: left;
-    width: 42%;
-    height: 500px;
-    border: 0px solid;
+.topcorner {
+    position:relative;
+    top:15px;
+    right: 15px;
+    float: right;
 }
 
-.mymaps #rightmap #routemapcontainer{
-    width: 100%;
-    height: 500px;
+.github{
+    background-image: url("img/ghl.png");
+    background-repeat: no-repeat;
+
 }
 
-.mymaps #leftmap #routemapcontainer{
-    width: 100%;
-    height: 500px;
+.github:hover{
+    background-image: url("img/gh.png");
 }
 
 @media (max-width: 500px) {

@@ -5,20 +5,13 @@
         <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600' rel='stylesheet' type='text/css'>
     </head>
     <body>
-    <div class="outer">
-        <div class="logo"></div>
-        <h1 class="title">Route Optimizer</h1>
-        <div class="subtitle">with Travelling Salesman Problem</div>
-    </div>
-    <div class="mymaps">
-        <div id="leftmap">
-            <h1>Inital Route</h1>
-            {{> initialroute}}
+        <div class="outer">
+            <h1 class="title">Route Optimizer</h1>
+            <div class="subtitle">with Simulated Annealing Travelling Salesman Problem</div>
         </div>
-        <div id="rightmap">
-            <h2>Optimized Route</h2>
-            {{> optimizedroute}}
+        <div class="routemaplayout">
+                {{> routemap}}
         </div>
-    </div>
+        {{> sAlert}}
     </body>
 </template>

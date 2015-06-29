@@ -26,7 +26,6 @@ Template.leaderboard.events({
     "click .delete": function () {
         var curCitiesCount = Cities.find({}, {sort: {pos: 1}}).count();
         if (curCitiesCount < 2) {
-            // TODO change to pop-up alert.
             sAlert.error('Cannot delete, Add at least two items to compute route.', {effect: 'genie', position: 'top-right', timeout: '3000', onRouteClose: false, stack: false, offset: '80px'});
             console.log("Cannot delete, Add at least two items to compute route.");
             return;
@@ -46,7 +45,6 @@ Template.leaderboard.events({
 
         var formattedCityJson;
 
-        //TODO Change error throwing mechanism for false requests.
         Meteor.call('fetchFromGoogleMapsAPI', text, function (err, respJson) {
             if (err) {
                 var reason = "Error: " + err.reason;
@@ -73,7 +71,6 @@ Template.leaderboard.events({
                     });
                 }
                 else{
-                    // TODO Change to pop-up alert.
                     sAlert.error('Invalid location name/code.', {effect: 'genie', position: 'top-right', timeout: '3000', onRouteClose: false, stack: false, offset: '80px'});
                 }
             }
@@ -91,25 +88,14 @@ Template.leaderboard.events({
 
         console.log("Button Clicked");
 
-        // TODO set message of console in dom.
-        if(Cities.find().count() < 2){
-            sAlert.error('Enter at least two locations to compute route.', {effect: 'genie', position: 'top-right', timeout: '3000', onRouteClose: false, stack: false, offset: '80px'});
-            return;
+        var locationsDO = Cities.find({}, {sort: {pos: 1}});
+
+        if(locationsDO.count() < 3){
+            sAlert.error('Enter at least three locations to compute route.', {effect: 'genie', position: 'top-right', timeout: '3000', onRouteClose: false, stack: false, offset: '80px'});
+            return false;
         }
 
         // go to route map page.
         Router.go('/routemap');
     }
 });
-/*
- * Get the incrementing Id number for each location added. This is required to track cities while shuffling.
- */
-function getNextSequenceNumber(loc_name){
-    Counter.update(loc_name, {$inc: {seq: 1}});
-
-    var ret = Counter.find("seq");
-
-    console.log(ret);
-
-    return ret.seq;
-}
