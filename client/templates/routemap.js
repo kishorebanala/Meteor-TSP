@@ -15,21 +15,13 @@ Template.routemap.helpers({
 
 Template.routemap.onCreated(function () {
 
-});
-// End optimizedroute map onCreated.
-
-Template.routemap.events(function () {
-
-});
-
-Template.routemap.onRendered(function(){
-    var routePlan = new google.maps.Polyline({    // Draw poly lines.
+    var routePlan = new google.maps.Polyline({
         geodesic: true,
         strokeColor: '#0066FF',
         strokeOpacity: 0.8,
         strokeWeight: 4
     });
-    // We can use the `ready` callback to interact with the map API once the map is ready.
+
     GoogleMaps.ready('optimizedroutemap', function (map) {
         console.log("Google Maps is ready.");
         googleMap = map.instance;
@@ -39,6 +31,9 @@ Template.routemap.onRendered(function(){
         var citiesArray = Cities.find({}, {sort: {pos: 1}}).fetch();
 
         var routePlanCoordinates = cityCoordinates(citiesArray, map); // Get Lat Long coordinates from mongoDB.
+        RouteMarkers.insert({
+           markers: routePlanCoordinates
+        });
         addMarkers(routePlanCoordinates, map);        // Add Markers.
         var initialPlan = new google.maps.Polyline({    // Draw poly lines.
             path: routePlanCoordinates,
@@ -48,14 +43,62 @@ Template.routemap.onRendered(function(){
             strokeWeight: 4,
             map: map.instance
         });
-        // End Draw Polyline
-        routePlan.setMap(map.instance);
 
+        routePlan.setMap(map.instance);
     });
-    Session.set("routePath", []);
-    routePlan.setPath(Session.get("routePath"));
-    // End optimizedroute map ready.
-    sAlert.error('Starting Simulated Annealing.', {effect: 'genie', position: 'top-right', timeout: '5000', onRouteClose: false, stack: false, offset: '80px'});
+
+    var markers = {};
+
+    RouteMarkers.find().observe({
+        added: function(document) {
+            /*// Create a marker for this document
+            var marker = new google.maps.Marker({
+                draggable: true,
+                animation: google.maps.Animation.DROP,
+                position: new google.maps.LatLng(document.lat, document.lng),
+                map: map.instance,
+                // We store the document _id on the marker in order
+                // to update the document within the 'dragend' event below.
+                id: document._id
+            });
+
+            // This listener lets us drag markers on the map and update their corresponding document.
+            google.maps.event.addListener(marker, 'dragend', function(event) {
+                Markers.update(marker.id, { $set: { lat: event.latLng.lat(), lng: event.latLng.lng() }});
+            });
+
+            // Store this marker instance within the markers object.
+            markers[document._id] = marker;*/
+        },
+        changed: function(newDocument, oldDocument) {
+            console.log("Markers changed: from Mongo Collection.", newDocument.markers);
+
+            var newPath = [];
+            var curLat;
+            var curLong;
+            for(var i = 0; i < newDocument.markers.length; i++) {
+                curLat = newDocument.markers[i].A;
+                curLong = newDocument.markers[i].F;
+                newPath.push(new google.maps.LatLng(curLat, curLong))
+            }
+            routePlan.setPath(newPath);
+            /*google.maps.event.addListener(routePlan, function(event) {
+                routePlan.setPath(newDocument);
+            });*/
+
+        },
+        removed: function(oldDocument) {
+        }
+    });
+});
+// End optimizedroute map onCreated.
+
+Template.routemap.events(function () {
+
+});
+
+Template.routemap.onRendered(function(){
+    sAlert.info('Starting Simulated Annealing.', {effect: 'stackslide', position: 'top-right', timeout: '4000', onRouteClose: false, stack: true, offset: '80px'});
     // Start simulated annealing.
     simulatedAnnealing();
 });
@@ -97,11 +140,4 @@ function cityCoordinates(citiesArray, map){
     map.instance.setZoom(5);
 
     return coordinates;
-}
-
-/**
- * Calculate map zoom and center options using location data.
- */
-function getMapDisplayOptions(locationData){
-
 }

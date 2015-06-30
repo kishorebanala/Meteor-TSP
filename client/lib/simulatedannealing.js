@@ -35,7 +35,7 @@ function startSimulatedAnnealing(distanceMatrix){
 
     console.log("Simulated Annealing started.");
 
-    var temperature = 10; //(locationsArrayLength * locationsArrayLength); // Change to number of cities times a constant.
+    var temperature = (locationsArrayLength * locationsArrayLength); // Change to number of cities times a constant.
     var coolingRate = 0.9; // Determine this too from number of cities.
     var absoluteTemperature = 0.001; // Temperature we would like the system to cool down to.
     var nextRoute = [];
@@ -44,8 +44,6 @@ function startSimulatedAnnealing(distanceMatrix){
     var initialRoute = locationsArray.slice();                // Staring route passed by user.
     var currentBestRoute = initialRoute.slice();           // Best route so far.
     var currentBestRouteCost = routeCost(currentBestRoute, distanceMatrix);
-
-    console.log("Initial best route cost: ", currentBestRouteCost);
 
     while (temperature > absoluteTemperature) {
         /*
@@ -60,24 +58,21 @@ function startSimulatedAnnealing(distanceMatrix){
         var initialRouteCost = routeCost(initialRoute, distanceMatrix);
         var nextRouteCost = routeCost(nextRoute, distanceMatrix);
 
-        console.log("Initial Route cost: ", initialRouteCost);
-        console.log("Next rand route: ", nextRouteCost);
+        /*console.log("Initial Route cost: ", initialRouteCost);
+        console.log("Next rand route: ", nextRouteCost);*/
 
         // If it's better, then switch to it.
         var isLessThan = (Math.round(nextRouteCost) < Math.round(initialRouteCost));
-        console.log("isLessthan: ", isLessThan);
         if(isLessThan) {
-            console.log("Routes swapped");
+            //console.log("Routes swapped");
             initialRoute = nextRoute;
 
             var planCoords = getRoutePlanPath(initialRoute);
-            Session.set("routePlan", planCoords);
+            Meteor.call('updateMarkers', 'routemarkers', planCoords);
 
             if(nextRouteCost < currentBestRouteCost) {
                 currentBestRoute = nextRoute;
                 currentBestRouteCost = nextRouteCost;
-
-                console.log("Current Best cost: ", currentBestRouteCost);
             }
         }
         // Jump to next route based on probability function.
@@ -90,6 +85,8 @@ function startSimulatedAnnealing(distanceMatrix){
     }
     console.log("Best Route: ", currentBestRoute);
     console.log("Best Route Cost: ", currentBestRouteCost);
+    var finalCoords = getRoutePlanPath(currentBestRoute);
+    Meteor.call('updateMarkers', 'routemarkers', finalCoords);
 }
 
 
@@ -104,7 +101,7 @@ Output: a tour
 */
 // TODO leave start and end points after test.
     function nextRandomRoute(route){
-        var i = route.length,
+        var i = route.length -1,
             j = 0,
             temp;
 
@@ -113,10 +110,11 @@ Output: a tour
             j = Math.floor(Math.random() * (i+1));
 
             // swap randomly chosen element with current element
-            temp = route[i];
-            route[i] = route[j];
-            route[j] = temp;
-
+            if(!(i ==0 || j == 0)) {
+                temp = route[i];
+                route[i] = route[j];
+                route[j] = temp;
+            }
         }
 
         return route;
@@ -202,8 +200,8 @@ maintenance and IP blocking for incorrect request format.
             if (err) {
                 getDistanceMatrixFromBackUpAPI();
                 var reason = "Error: " + err.reason;
-                sAlert.error(reason, {effect: 'genie', position: 'top-right', timeout: '3000', onRouteClose: false, stack: false, offset: '80px'});
-                sAlert.error("Failed to get data from MapQuest API. Trying with BackUp APIs.", {effect: 'genie', position: 'top-right', timeout: '3000', onRouteClose: false, stack: false, offset: '80px'});
+                sAlert.error(reason, {effect: 'stackslide', position: 'top-right', timeout: '5000', onRouteClose: false, stack: true, offset: '80px'});
+                sAlert.error("Failed to get data from MapQuest API. Trying with BackUp APIs.", {effect: 'stackslide', position: 'top-right', timeout: '5000', onRouteClose: false, stack: true, offset: '80px'});
                 console.log("error occured on receiving data on fetchFromMapQuestDistanceAPI. ", err);
             } else {
                 console.log("Response JSON for MapQuest: ", respJson);
@@ -214,7 +212,7 @@ maintenance and IP blocking for incorrect request format.
                 }
                 else{
                     getDistanceMatrixFromBackUpAPI();
-                    sAlert.error("Failed to get data from MapQuest API. Trying with BackUp APIs.", {effect: 'genie', position: 'top-right', timeout: '3000', onRouteClose: false, stack: false, offset: '80px'});
+                    sAlert.error("Failed to get data from MapQuest API. Trying with BackUp APIs.", {effect: 'stackslide', position: 'top-right', timeout: '6000', onRouteClose: false, stack: true, offset: '80px'});
                     console.log("Failed to get data from MapQuest API. Trying with BackUp APIs.");
                 }
             }
@@ -279,8 +277,8 @@ maintenance and IP blocking for incorrect request format.
         Meteor.call('fetchFromOSRMDistanceAPI', locationsQuery, function (err, respJson) {
             if (err) {
                 var reason = "Error: " + err.reason;
-                sAlert.error(reason, {effect: 'genie', position: 'top-right', timeout: '3000', onRouteClose: false, stack: false, offset: '80px'});
-                sAlert.error("Failed to get data from Backup APIs too. May be try again later?", {effect: 'genie', position: 'top-right', timeout: '3000', onRouteClose: false, stack: false, offset: '80px'});
+                sAlert.error(reason, {effect: 'stackslide', position: 'top-right', timeout: '5000', onRouteClose: false, stack: true, offset: '80px'});
+                sAlert.error("Failed to get data from Backup APIs too. May be try again later?", {effect: 'stackslide', position: 'top-right', timeout: 'none', onRouteClose: false, stack: true, offset: '80px'});
                 console.log("error occured on receiving data on fetchFromOSRMDistanceAPI. ", err);
             } else {
                 if(respJson != null && respJson.distance_table != null){
@@ -290,7 +288,7 @@ maintenance and IP blocking for incorrect request format.
                 }
                 else {
                     console.log("error occured on receiving data on fetchFromOSRMDistanceAPI. ");
-                    sAlert.error("Failed to get data from Backup APIs too, May be try again later?.", {effect: 'genie', position: 'top-right', timeout: '3000', onRouteClose: false, stack: false, offset: '80px'});
+                    sAlert.error("Failed to get data from Backup APIs too, May be try again later?.", {effect: 'stackslide', position: 'top-right', timeout: 'none', onRouteClose: false, stack: true, offset: '80px'});
                 }
             }
         });
@@ -309,6 +307,22 @@ maintenance and IP blocking for incorrect request format.
         }
 
         return coordinates;
+    }
+
+    function drawOnMap(planCoords){
+        console.log("Drawing new map.");
+        GoogleMaps.ready('optimizedroutemap', function (map) {
+            googleMap = map.instance;
+            //addMarkers(routePlanCoordinates, map);        // Add Markers.
+            var routePlan = new google.maps.Polyline({    // Draw poly lines.
+                geodesic: true,
+                strokeColor: '#FF8080',
+                strokeOpacity: 0.8,
+                strokeWeight: 4,
+                map: map.instance
+            });
+            routePlan.setPath(planCoords);
+        });
     }
 
     function distance(city1, city2){

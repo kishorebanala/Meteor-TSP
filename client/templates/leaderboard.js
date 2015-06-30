@@ -26,7 +26,7 @@ Template.leaderboard.events({
     "click .delete": function () {
         var curCitiesCount = Cities.find({}, {sort: {pos: 1}}).count();
         if (curCitiesCount < 2) {
-            sAlert.error('Cannot delete, Add at least two items to compute route.', {effect: 'genie', position: 'top-right', timeout: '3000', onRouteClose: false, stack: false, offset: '80px'});
+            sAlert.error('Cannot delete, Add at least two items to compute route.', {effect: 'stackslide', position: 'top-right', timeout: '6000', onRouteClose: false, stack: true, offset: '80px'});
             console.log("Cannot delete, Add at least two items to compute route.");
             return;
         }
@@ -39,7 +39,7 @@ Template.leaderboard.events({
         var text = event.target.text.value;
 
         if (text == "" || text == null) {
-            sAlert.error('Location name/code cannot be empty.', {effect: 'genie', position: 'top-right', timeout: '3000', onRouteClose: false, stack: false, offset: '80px'});
+            sAlert.error('Location name/code cannot be empty.', {effect: 'stackslide', position: 'top-right', timeout: '4000', onRouteClose: false, stack: true, offset: '80px'});
             return false;
         }
 
@@ -48,7 +48,7 @@ Template.leaderboard.events({
         Meteor.call('fetchFromGoogleMapsAPI', text, function (err, respJson) {
             if (err) {
                 var reason = "Error: " + err.reason;
-                sAlert.error(reason, {effect: 'genie', position: 'top-right', timeout: '3000', onRouteClose: false, stack: false, offset: '80px'});
+                sAlert.error(reason, {effect: 'stackslide', position: 'top-right', timeout: '5000', onRouteClose: false, stack: true, offset: '80px'});
                 console.log("error occured on receiving data on server. ", err);
             } else {
                 if(respJson.status == "OK") {
@@ -71,7 +71,7 @@ Template.leaderboard.events({
                     });
                 }
                 else{
-                    sAlert.error('Invalid location name/code.', {effect: 'genie', position: 'top-right', timeout: '3000', onRouteClose: false, stack: false, offset: '80px'});
+                    sAlert.error('Invalid location name/code.', {effect: 'stackslide', position: 'top-right', timeout: '5000', onRouteClose: false, stack: true, offset: '80px'});
                 }
             }
         });
@@ -91,7 +91,7 @@ Template.leaderboard.events({
         var locationsDO = Cities.find({}, {sort: {pos: 1}});
 
         if(locationsDO.count() < 3){
-            sAlert.error('Enter at least three locations to compute route.', {effect: 'genie', position: 'top-right', timeout: '3000', onRouteClose: false, stack: false, offset: '80px'});
+            sAlert.error('Enter at least three locations to compute route.', {effect: 'stackslide', position: 'top-right', timeout: '6000', onRouteClose: false, stack: true, offset: '80px'});
             return false;
         }
 

@@ -9,6 +9,9 @@ Sortable.collections = ['cities'];
 
 // Add some data to locations board, if nothing is present.
 Meteor.startup(function() {
+    // Clear locations data.
+    Cities.remove({});
+
     if (Cities.find().count() === 0) {
         [
             { name: 'New York, NY, USA', latitude: '40.7127837', longitude: '-74.0059413' },
@@ -27,6 +30,9 @@ Meteor.startup(function() {
         );
         console.log('Launched app with sample data.');
     }
+
+    // Clear route markers.
+    RouteMarkers.remove({});
 });
 /*
  * Custom method, used along with RubaXa Sotrable library.
@@ -46,5 +52,9 @@ Meteor.methods({
        }
        console.log("Location %s removed.", item.name);
        collection.remove(item._id);
-   }
+   },
+    updateMarkers: function( collectionName, planCoords ) {
+        var markerCollection = Mongo.Collection.get(collectionName);
+        markerCollection.update({}, {$set: {markers: planCoords}});
+    }
 });
