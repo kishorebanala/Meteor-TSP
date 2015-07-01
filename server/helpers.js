@@ -9,8 +9,6 @@ Sortable.collections = ['cities'];
 
 // Add some data to locations board, if nothing is present.
 Meteor.startup(function() {
-    // Clear locations data.
-    Cities.remove({});
 
     if (Cities.find().count() === 0) {
         [

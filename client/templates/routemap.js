@@ -93,14 +93,26 @@ Template.routemap.onCreated(function () {
 });
 // End optimizedroute map onCreated.
 
-Template.routemap.events(function () {
+Template.routemaplayout.events( {
+    // Go back to home.
+    "click .homenav" : function (event) {
+        // This function is called when Find Optimal Route button is pressed.
 
+        console.log("Routing back to home");
+
+        // TODO kill current process.
+
+        // go to home page.
+        Router.go('/');
+    }
 });
 
 Template.routemap.onRendered(function(){
     sAlert.info('Starting Simulated Annealing.', {effect: 'stackslide', position: 'top-right', timeout: '4000', onRouteClose: false, stack: true, offset: '80px'});
     // Start simulated annealing.
+    NProgress.start();
     simulatedAnnealing();
+    NProgress.done();
 });
 
 function addMarkers(routePlanCoordinates, map){

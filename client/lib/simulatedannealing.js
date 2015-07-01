@@ -217,6 +217,7 @@ maintenance and IP blocking for incorrect request format.
                 }
             }
         });
+        //NProgress.done();
         /*var isErr = false;
 
         var respJson = Meteor.call('fetchFromOSRMDistanceAPI', locationsQuery);
