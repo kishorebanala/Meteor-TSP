@@ -12,7 +12,7 @@ Meteor App for finding optimal route, using Simulated Annealing Travelling Sales
 
 ### 2. Using Test Data:
 
-     Test data consists of 25 most populated US Cities. The number of possible routes between these 25 cities is 25! or 1.5511210043330985984 × 10^25 or 15 million billion billion. Finding an optimal route between these cities is an NP-hard problem. Simulated Annealing is one of the best known algorithms for solving Travelling Salesman problem, and it is also helpful here in finding possibly optimal route in considerably less number of iterations (About 10 million for given problem).
+     Test data consists of 16 most populated US Cities. The number of possible routes between these 16 cities is 16! or 2.0922789888 × 10^13 or 20 trillion 922 billion ... Finding an optimal route between these cities is an NP-hard problem. Simulated Annealing is one of the best known algorithms for solving Travelling Salesman problem, and it is also helpful here in finding possibly optimal route in considerably less number of iterations (About 10 million for given problem).
      
 ### 3..... (Add more)
 
