@@ -18,6 +18,7 @@ Meteor App for finding optimal route, using Simulated Annealing Travelling Sales
 
 ### TODOs:
 - Fix screen freeze on computing route. 
+- Check APIs: Current API usage works best for only upto 10 locations.
 - Map should show up route changes in real-time.
 - Add more test cases.
 - Display Metrics table.
