@@ -18,7 +18,25 @@ Template.routemap.helpers({
 
 Template.routemap.onCreated(function () {
 
-    var routePlan = new google.maps.Polyline({
+    if(typeof google === 'undefined'){
+        console.log("Session might have expired.");
+        Router.go('/sessionexpired');
+        return false;
+    }
+
+    // Show progress bar.
+    NProgress.start();
+
+    // Declaring route polyline out of GoogleMaps ready callback scope has bought up many advantages. With google map's inside setter functions, drawing new polylines
+    // has been easier now. And also, this allows us to route user on blank template page on session expire or refresh.
+    var initialPolyline = new google.maps.Polyline({    // Draw poly lines
+        geodesic: true,
+        strokeColor: '#FF8080',
+        strokeOpacity: 0.8,
+        strokeWeight: 4
+    });
+
+    var newRoutePolyline = new google.maps.Polyline({
         geodesic: true,
         strokeColor: '#0066FF',
         strokeOpacity: 0.8,
@@ -27,29 +45,13 @@ Template.routemap.onCreated(function () {
 
     GoogleMaps.ready('optimizedroutemap', function (map) {
         console.log("Google Maps is ready.");
-        googleMap = map.instance;
-        this.mapInstance = map.instance;
-        // TODO get data from session and Throw error if session has expired.
-        // var citiesArray = Session.get("locationsData");
-
-        var citiesArray = Cities.find({}, {sort: {pos: 1}}).fetch();
-
-        var routePlanCoordinates = cityCoordinates(citiesArray, map); // Get Lat Long coordinates from mongoDB.
-
-        var initialPlan = new google.maps.Polyline({    // Draw poly lines.
-            path: routePlanCoordinates,
-            geodesic: true,
-            strokeColor: '#FF8080',
-            strokeOpacity: 0.8,
-            strokeWeight: 4,
-            map: map.instance
-        });
-
-        routePlan.setMap(map.instance);
+        initialPolyline.setMap(map.instance);
+        newRoutePolyline.setMap(map.instance);
     });
 
     var newRoutePath = [];
     var routePathDep = new Tracker.Dependency;
+
 
     var getNewRoutePath = function () {
             routePathDep.depend();
@@ -57,16 +59,15 @@ Template.routemap.onCreated(function () {
         };
 
     setNewRoutePath = function (newPath) {
-            console.log("New route path set.");
+            //console.log("New route path set.");
             newRoutePath = newPath;
             routePathDep.changed();
         };
 
     Tracker.autorun(function(){
-        // TODO draw new ploylines
-        console.log("Drawing new route path.");
+        //console.log("Drawing new route path.");
         var newPath = getRoutePlanPoints(getNewRoutePath());
-        routePlan.setPath(newPath);
+        newRoutePolyline.setPath(newPath);
     });
 
     var bestRoute = [];
@@ -84,29 +85,55 @@ Template.routemap.onCreated(function () {
     };
 
     Tracker.autorun(function(){
-        // TODO Add markers.
         console.log("Adding Markers.");
         var bestPath = getRoutePlanPoints(getBestRoutePath());
-        //addMarkers(bestPath, this.mapInstance);
-        GoogleMaps.ready('optimizedroutemap', function (map) {
-            for (i = 0; i < bestPath.length; i++) {
+        for (i = 0; i < bestPath.length; i++) {
 
-                var image = new google.maps.MarkerImage('img/marker' + (i + 1) + '.png',
-                    new google.maps.Size(20, 34),
-                    new google.maps.Point(0, 0),
-                    new google.maps.Point(10, 34));
+            var image = new google.maps.MarkerImage('img/marker' + (i + 1) + '.png',
+                new google.maps.Size(20, 34),
+                new google.maps.Point(0, 0),
+                new google.maps.Point(10, 34));
 
-                var marker = new google.maps.Marker({
-                    position: bestPath[i],
-                    map: map.instance,
-                    icon: image
-                });
-            }
-        });
+            var marker = new google.maps.Marker({
+                position: bestPath[i],
+                map: GoogleMaps.maps.optimizedroutemap.instance,
+                icon: image
+            });
+        }
     });
+
+    drawInitialPolyline = function(routePlan){
+        var routePlanPoints = getRoutePlanPoints(routePlan);
+        initialPolyline.setPath(routePlanPoints);
+        setMapOptions(routePlan, GoogleMaps.maps.optimizedroutemap.instance);
+    }
 
 });
 // End optimizedroute map onCreated.
+
+Template.routemap.onRendered(function(){
+    var isTestData = Session.get("isTestData");
+    console.log("Is using test data: ", isTestData);
+    sAlert.info('Starting Simulated Annealing.', {effect: 'stackslide', position: 'top-right', timeout: '4000', onRouteClose: false, stack: true, offset: '80px'});
+    // Wait for maps to load.
+    // TODO check timeout.
+    Meteor.setTimeout(function(){
+        if((typeof isTestData !== 'undefined') && isTestData){
+            //startSimulatedAnnealing(testDistMatrix[0].distance_matrix, testLocations);
+            // TODO Render test data and draw polylines is breaking, try to do it in pipeline.
+            runSimulatedAnnealingWithTestData();
+        }
+        else{
+            // Run Simulated Annealing Asynchronously. It stops if calls to API fails.
+            runSimulatedAnnealingAsync();
+        }
+    }, 2000);
+});
+
+// Wait for the route map template to render: (Making sure all divs with maps and css elements are loaded.)
+Template.routemap.rendered = function(){
+
+};
 
 // TODO Rename function and add comments.
 function getRoutePlanPoints(newRoute){
@@ -123,97 +150,19 @@ function getRoutePlanPoints(newRoute){
     return coordinates;
 }
 
-Template.routemaplayout.events( {
-    // Go back to home.
-    "click .homenav" : function (event) {
-        // This function is called when Find Optimal Route button is pressed.
-
-        console.log("Routing back to home");
-
-        // TODO kill current process.
-
-        // go to home page.
-        Router.go('/');
-    }
-});
-
-// TODO move to seperate place, add comments.
-
-Template.routemap.onRendered(function(){
-    sAlert.info('Starting Simulated Annealing.', {effect: 'stackslide', position: 'top-right', timeout: '4000', onRouteClose: false, stack: true, offset: '80px'});
-    // Start simulated annealing.
-
-    // Start spinner.
-    NProgress.start();
-
-    // Check if test data.
-    var isTestData = Session.get("isTestData");
-    console.log("Is using test data: ", isTestData);
-    if((typeof isTestData !== 'undefined') && isTestData){
-        // TODO do this asynchronously.
-        if(TestLocations.find().count() < 1){
-            sAlert.info("Loading Test Data, might take few seconds for first time.", {effect: 'stackslide', position: 'top-right', timeout: '3000', onRouteClose: false, stack: true, offset: '80px'});
-            //NProgress.start();
-            Meteor.call('populateTestData', function(err, res){
-                if(err){
-                    console.log("Failed to populate test data");
-                }
-                else{
-                    console.log("Insert test data success.")
-                }
-            });
-        }
-        if(TestDistanceMatrix.find().count() < 1){
-            sAlert.info("Loading Test Data, might take few seconds for first time.", {effect: 'stackslide', position: 'top-right', timeout: '3000', onRouteClose: false, stack: true, offset: '80px'});
-            //NProgress.start();
-            Meteor.call('populateTestDistMatrixData', function(err, res){
-                if(err){
-                    console.log("Failed to populate test data");
-                }
-                else{
-                    console.log("Insert test data success.");
-                }
-            });
-
-        }
-        // TODO Run Async or only after making sure data is present.
-        var testDistMatrix = TestDistanceMatrix.find({}, {sort: {pos: 1}}).fetch();
-        //console.log("testDistMatrix: ", testDistMatrix[0].distance_matrix);
-        var testLocations = TestLocations.find({}, {sort: {pos: 1}}).fetch();
-        //console.log("testLoc Length: ", testLocations.length);
-        startSimulatedAnnealing(testDistMatrix[0].distance_matrix, testLocations);
-    }
-    else{
-        // Run Simulated Annealing Asynchronously. It stops if calls to API fails.
-        runSimulatedAnnealingAsync();
-    }
-
-    // TODO move distance matrix functions to utils file.
-    // Get Distance Matrix Synchronously.
-
-    // TODO add markers from final return data.
-    //this.mapInstance;
-
-});
-function cityCoordinates(citiesArray, map){
-    var coordinates = [];
+function setMapOptions(locationsArray, map){
     var lats = 0;
     var longs = 0;
+    var arrLength = locationsArray.length;
 
-    // TODO debug only, set sessions from seperate function if useful.
-    var arrLength = citiesArray.length;
     // Create Lat long Array.
     for(i=0; i < arrLength; i++){
-        var curLat = citiesArray[i].lat;
-        var curLong = citiesArray[i].lng;
-        coordinates.push(new google.maps.LatLng(curLat, curLong));
+        var curLat = locationsArray[i].lat;
+        var curLong = locationsArray[i].lng;
         lats += Number(curLat);
         longs += Number(curLong);
     }
 
-    map.instance.setCenter(new google.maps.LatLng(lats/arrLength, longs/arrLength));
-    // TODO set zoom by distance.
-    map.instance.setZoom(5);
-
-    return coordinates;
+    map.setCenter(new google.maps.LatLng(lats/arrLength, longs/arrLength));
+    map.setZoom(4);
 }

@@ -28,9 +28,6 @@ Meteor.startup(function() {
         );
         console.log('Launched app with sample data.');
     }
-
-    // Clear route markers.
-    RouteMarkers.remove({});
 });
 /*
  * Custom method, used along with RubaXa Sotrable library.
@@ -50,19 +47,5 @@ Meteor.methods({
        }
        console.log("Location %s removed.", item.name);
        collection.remove(item._id);
-   },
-    populateTestLocationsData: function() {
-        var data = JSON.parse(Assets.getText("testdata/GeoLocations.json"));
-        data.locations.forEach(function (item, index, array) {
-            TestLocations.insert(item);
-        });
-        console.log("Test Locations Data inserted");
-    },
-    populateTestDistMatrixData: function() {
-        var data = JSON.parse(Assets.getText("testdata/DistanceMatrix.json"));
-        TestDistanceMatrix.insert({
-            distance_matrix: data.distance_table
-        });
-        console.log("Test Locations Data inserted");
-    }
+   }
 });

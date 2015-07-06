@@ -220,23 +220,31 @@ body {
     margin: 4%;
 }
 
-.topcorner {
-    position:relative;
-    top:15px;
-    right: 15px;
+.bottomcorner {
+    position:absolute;
+    bottom: 15px;
+    right: 10px;
     float: right;
+
 }
 
-.topcorner #github{
+.bottomcorner #github{
+    position: relative;
+    display: block;
+    padding: 12px 25px;
+    float: right;
     opacity: 0.6;
-
+    margin-right: 25%;
 }
 
-.topcorner #github:hover{
+.bottomcorner #github:hover{
     opacity: 1;
 }
 
-.topcorner .testdata{
+.bottomcorner #testdata{
+    position: relative;
+    display: block;
+    float: right;
     border-radius: 3em;
     border: #FF6666 1.5px solid;
     /* TODO Confirm submit button color.*/
@@ -244,8 +252,6 @@ body {
     color: #FF6666;
     cursor: pointer;
     width: 80%;
-    margin-left: 10%;
-    margin-right: 10%;
     margin-top: 8px;
     font-family: 'Source Sans Pro' ,'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-size: 1.2rem;
@@ -257,12 +263,10 @@ body {
     overflow:hidden;
 }
 
-.topcorner .testdata:hover {
+.bottomcorner #testdata:hover {
     background: #E65C5C;
     color: #ffffff;
 }
-
-
 
 .topleftcorner {
     position:relative;

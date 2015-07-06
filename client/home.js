@@ -3,7 +3,7 @@
  */
 
 Template.home.events({
-    "click .testdata": function (event) {
+    "click #testdata": function (event) {
         // This function is called when use test data button is pressed.
 
         console.log("Using Test Data");

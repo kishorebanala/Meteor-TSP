@@ -2,15 +2,15 @@
  * Created by Kishore on 6/20/2015.
  */
 
-// Load Google Maps
-
 Meteor.startup(function () {
+    // Configure Google Maps and load.
     GoogleMaps.load({
         v: '3',
         key: 'AIzaSyBCyHWSJ7wuGGCPHfc9zMJ0Iv-uhJ21iHo',
         libraries: 'geometry,places'
     });
 
+    // Config SAlert for defaults.
     sAlert.config({
         effect: '',
         position: 'top',
@@ -32,6 +32,10 @@ Router.route('/routemap', function(){
     /*this.layout('routemaplayout')*/
 });
 
+Router.route('/sessionexpired', function(){
+    this.render('sessionexpiredlayout');
+});
+
 Router.route('/playground', function(){
     this.render('playground');
 });
@@ -39,3 +43,32 @@ Router.route('/playground', function(){
 /*Router.configure({
     layoutTemplate: 'layout'
 });*/
+
+// External simple events.
+Template.routemaplayout.events( {
+    // Go back to home.
+    "click .homenav" : function (event) {
+        // This function is called when Find Optimal Route button is pressed.
+
+        console.log("Routing back to home");
+
+        // TODO kill current process.
+
+        // go back to home page.
+        Router.go('/');
+    }
+});
+
+Template.sessionexpiredlayout.events( {
+    // Go back to home.
+    "click .homenav" : function (event) {
+        // This function is called when Find Optimal Route button is pressed.
+
+        console.log("Routing back to home");
+
+        // TODO kill current process.
+
+        // go back to home page.
+        Router.go('/');
+    }
+});

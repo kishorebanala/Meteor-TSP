@@ -28,16 +28,21 @@ startSimulatedAnnealing = function(distanceMatrix, locationsArray){
 
     console.log("Simulated Annealing started.");
 
-    var temperature = Math.pow(2, locationsArrayLength);//(locationsArrayLength * locationsArrayLength); // Change to number of cities times a constant.
-    var coolingRate = 0.9995; // Determine this too from number of cities.
+    // Start with number of all possible routes.
+    var temperature = calculateFactorial(locationsArrayLength); //Math.pow(2, locationsArrayLength); //(locationsArrayLength * locationsArrayLength);
+    var coolingRate = calculateCoolingRate(locationsArrayLength); // Determine this too from number of cities.
     var absoluteTemperature = 0.001; // Temperature we would like the system to cool down to.
     var nextRoute = [];
     var temp = [];
+
+    console.log("Initial Temp: ", temperature);
+    console.log("Cooling rate: ", coolingRate);
 
     var initialRoute = locationsArray.slice();                // Staring route passed by user.
     var currentBestRoute = initialRoute.slice();           // Best route so far.
     var currentBestRouteCost = routeCost(currentBestRoute, distanceMatrix);
 
+    drawInitialPolyline(initialRoute);      // Show initial or user selected route on map.
     var numberOfIterations = 0;
 
     while (temperature > absoluteTemperature) {
@@ -56,21 +61,17 @@ startSimulatedAnnealing = function(distanceMatrix, locationsArray){
         //console.log("Initial Route cost: ", initialRouteCost);
         //console.log("Next rand route: ", nextRouteCost);
 
-        // If it's better, then switch to it.
-        var isLessThan = (Math.round(nextRouteCost) < Math.round(initialRouteCost));
-        if(isLessThan) {
+        if(nextRouteCost < initialRouteCost) {
             //console.log("Next rand route: ", nextRouteCost);
             initialRoute = nextRoute;
-
-            /*var planCoords = getRoutePlanPath(initialRoute);
-            Meteor.call('updateMarkers', 'routemarkers', planCoords);*/
-            // Alert Tracker Dependency.
-            //console.log("Initial Route: ", initialRoute);
-            setNewRoutePath(initialRoute);
 
             if(nextRouteCost < currentBestRouteCost) {
                 currentBestRoute = nextRoute;
                 currentBestRouteCost = nextRouteCost;
+                Meteor.setTimeout(function(){
+                    setNewRoutePath(currentBestRoute);
+                }, 1000);
+                console.log("Current Best: ", currentBestRouteCost);
             }
         }
         // Jump to next route based on probability function.
@@ -88,6 +89,7 @@ startSimulatedAnnealing = function(distanceMatrix, locationsArray){
     console.log("Best Route Cost: ", currentBestRouteCost);
     // Draw markers with Tracker Dependency.
     setBestRoutePath(currentBestRoute);
+    NProgress.done();
 
 }
 
@@ -101,43 +103,41 @@ Next Route: Swap two locations (except start and end) in the route.
 Output: a tour
 
 */
-// TODO leave start and end points after test.
-    function nextRandomRoute(route){
-        var i = route.length -1,
-            j = 0,
-            temp;
+function nextRandomRoute(route){
+    var i = route.length -1,
+        j = 0,
+        temp;
 
-        while (i--) {
+    while (i--) {
 
-            j = Math.floor(Math.random() * (i+1));
+        j = Math.floor(Math.random() * (i+1));
 
-            // swap randomly chosen element with current element
-            if(!(i ==0 || j == 0)) {
-                temp = route[i];
-                route[i] = route[j];
-                route[j] = temp;
-            }
+        // swap randomly chosen element with current element
+        if(!(i ==0 || j == 0)) {
+            temp = route[i];
+            route[i] = route[j];
+            route[j] = temp;
         }
-
-        return route;
     }
+
+    return route;
+}
 
 /*
 Function: Compute cost of the Route.
 Call Distance matrix with route variables, add them, return cost value;
  */
-
-    function routeCost(route, distanceMatrix){
-        // Keep static distance matrix in hand.
-        // matrix[route[0]][route[1]] + matrix[route[1]][route[2]] + matrix[route[0]][route[1]] + ...
-        var cost = 0;
-        var i = 0;
-        for(var j = 1; j < route.length; j++){
-            i = j-1;
-            cost += Number(distanceMatrix[Number(route[i].pos)][Number(route[j].pos)]);
-        }
-        return cost;
+function routeCost(route, distanceMatrix){
+    // Keep static distance matrix in hand.
+    // matrix[route[0]][route[1]] + matrix[route[1]][route[2]] + matrix[route[0]][route[1]] + ...
+    var cost = 0;
+    var i = 0;
+    for(var j = 1; j < route.length; j++){
+        i = j-1;
+        cost += Number(distanceMatrix[Number(route[i].pos)][Number(route[j].pos)]);
     }
+    return cost;
+}
 
 /*
 Function: Jump to next route (s, s')
@@ -154,19 +154,38 @@ Output: true (if coinFlip resulted in heads) or false
 
 */
 
-    function jumpToNextRoute(presentCost, nextRouteCost, temperature){
+function jumpToNextRoute(presentCost, nextRouteCost, temperature){
 
-        var p = Math.exp(-(nextRouteCost - presentCost) / temperature);
-        var u = Math.floor(Math.random()); // Generates random number between 0 and 1, in decimals. could have any value in range.
-                               // Test and change this value if required.
-        if( u < p){
-            return true;
-        }
-        else{
-            return false;
-        }
+    var p = Math.exp(-(nextRouteCost - presentCost) / temperature);
+    var u = Math.floor(Math.random()); // Generates random number between 0 and 1, in decimals. could have any value in range.
+                           // Test and change this value if required.
+    if( u < p){
+        return true;
     }
+    else{
+        return false;
+    }
+}
 
+// Factorial of a number.
+function calculateFactorial(num){
+    if (num === 0)
+    { return 1; }
+    else
+    { return num * calculateFactorial( num - 1 ); }
+}
+
+// Calculate based on number of locations passed.
+function calculateCoolingRate(num){
+    var coolRate = "0.9";
+    if(num < 5){
+        return 0.99;
+    }
+    for(var i=0; i < Math.round(num/4); i++){
+        coolRate += "9";
+    }
+    return Number(coolRate);
+}
 
 /*
 
@@ -194,9 +213,28 @@ maintenance and IP blocking for incorrect request format.
 
 */
 
+    runSimulatedAnnealingWithTestData = function () {
+        Meteor.call('getTestLocationsData', function(err, res){
+           if(err){
+               console.log("Failed to get test locations data.");
+           }
+            else{
+               var locationsData = res;
+               Meteor.call('getTestDistanceMatrixData', function(err, distMatrix){
+                   if(err){
+                       console.log("Failed to get test distance matrix data.");
+                   }
+                   else{
+                       console.log("Starting simulated annealing from call back");
+                       startSimulatedAnnealing(distMatrix, locationsData);
+                   }
+               })
+           }
+        });
+    }
+
     // TODO pass in locations query.
     runSimulatedAnnealingAsync = function() {
-        // FIXME Remove after debug
         var locationsArray = Cities.find({}, {sort: {pos: 1}}).fetch();
         var locationsQuery = generateLocationsQuery(locationsArray, true); // Get query for MapQuest API as default.
         var distMatrix = [];
@@ -212,9 +250,7 @@ maintenance and IP blocking for incorrect request format.
                 console.log("Response JSON for MapQuest: ", respJson);
                 if(respJson.info.statuscode == Number(0)){
                     distMatrix = respJson.distance;
-                    console.log("All good at MQ: ", distMatrix);
                     Session.set('isDistMatReady', true);
-                    NProgress.done();
                     startSimulatedAnnealing(distMatrix, locationsArray);
                 }
                 else{
@@ -275,6 +311,5 @@ maintenance and IP blocking for incorrect request format.
                     sAlert.error("Failed to get data from Backup APIs too, May be try again later?.", {effect: 'stackslide', position: 'top-right', timeout: 'none', onRouteClose: false, stack: true, offset: '80px'});
                 }
             }
-            NProgress.done();
         });
     }
