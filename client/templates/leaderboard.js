@@ -65,8 +65,8 @@ Template.leaderboard.events({
                     // Insert into collection.
                     Cities.insert({
                         name: formattedCityJson.formatted_address,
-                        latitude: formattedCityJson.geometry.location.lat,
-                        longitude: formattedCityJson.geometry.location.lng,
+                        lat: formattedCityJson.geometry.location.lat,
+                        lng: formattedCityJson.geometry.location.lng,
                         pos: (newPos.pos + 1)
                     });
                 }
@@ -88,9 +88,7 @@ Template.leaderboard.events({
 
         console.log("Button Clicked");
 
-        var locationsDO = Cities.find({}, {sort: {pos: 1}});
-
-        if(locationsDO.count() < 3){
+        if(Cities.find().count() < 3){
             sAlert.error('Enter at least three locations to compute route.', {effect: 'stackslide', position: 'top-right', timeout: '6000', onRouteClose: false, stack: true, offset: '80px'});
             return false;
         }

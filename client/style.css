@@ -227,6 +227,43 @@ body {
     float: right;
 }
 
+.topcorner #github{
+    opacity: 0.6;
+
+}
+
+.topcorner #github:hover{
+    opacity: 1;
+}
+
+.topcorner .testdata{
+    border-radius: 3em;
+    border: #FF6666 1.5px solid;
+    /* TODO Confirm submit button color.*/
+    background: #ffffff;
+    color: #FF6666;
+    cursor: pointer;
+    width: 80%;
+    margin-left: 10%;
+    margin-right: 10%;
+    margin-top: 8px;
+    font-family: 'Source Sans Pro' ,'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 1.2rem;
+    font-weight: bold;
+    line-height: 1;
+    outline: none;
+    padding: 15px 55px;
+    transition: all 200ms ease-in;
+    overflow:hidden;
+}
+
+.topcorner .testdata:hover {
+    background: #E65C5C;
+    color: #ffffff;
+}
+
+
+
 .topleftcorner {
     position:relative;
     top: 3%;
@@ -246,15 +283,6 @@ body {
 .homenav:hover {
     opacity: 1;
     cursor: pointer;
-}
-
-.topcorner #github{
-    opacity: 0.6;
-
-}
-
-.topcorner #github:hover{
-    opacity: 1;
 }
 
 @media (max-width: 500px) {

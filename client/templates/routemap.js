@@ -10,6 +10,9 @@ Template.routemap.helpers({
             };
             return mapOptions;
         }
+    },
+    bestRouteCost: function() {
+        return Session.get('bestCost');
     }
 });
 
@@ -25,16 +28,14 @@ Template.routemap.onCreated(function () {
     GoogleMaps.ready('optimizedroutemap', function (map) {
         console.log("Google Maps is ready.");
         googleMap = map.instance;
+        this.mapInstance = map.instance;
         // TODO get data from session and Throw error if session has expired.
         // var citiesArray = Session.get("locationsData");
 
         var citiesArray = Cities.find({}, {sort: {pos: 1}}).fetch();
 
         var routePlanCoordinates = cityCoordinates(citiesArray, map); // Get Lat Long coordinates from mongoDB.
-        RouteMarkers.insert({
-           markers: routePlanCoordinates
-        });
-        addMarkers(routePlanCoordinates, map);        // Add Markers.
+
         var initialPlan = new google.maps.Polyline({    // Draw poly lines.
             path: routePlanCoordinates,
             geodesic: true,
@@ -47,51 +48,80 @@ Template.routemap.onCreated(function () {
         routePlan.setMap(map.instance);
     });
 
-    var markers = {};
+    var newRoutePath = [];
+    var routePathDep = new Tracker.Dependency;
 
-    RouteMarkers.find().observe({
-        added: function(document) {
-            /*// Create a marker for this document
-            var marker = new google.maps.Marker({
-                draggable: true,
-                animation: google.maps.Animation.DROP,
-                position: new google.maps.LatLng(document.lat, document.lng),
-                map: map.instance,
-                // We store the document _id on the marker in order
-                // to update the document within the 'dragend' event below.
-                id: document._id
-            });
+    var getNewRoutePath = function () {
+            routePathDep.depend();
+            return newRoutePath;
+        };
 
-            // This listener lets us drag markers on the map and update their corresponding document.
-            google.maps.event.addListener(marker, 'dragend', function(event) {
-                Markers.update(marker.id, { $set: { lat: event.latLng.lat(), lng: event.latLng.lng() }});
-            });
+    setNewRoutePath = function (newPath) {
+            console.log("New route path set.");
+            newRoutePath = newPath;
+            routePathDep.changed();
+        };
 
-            // Store this marker instance within the markers object.
-            markers[document._id] = marker;*/
-        },
-        changed: function(newDocument, oldDocument) {
-            console.log("Markers changed: from Mongo Collection.", newDocument.markers);
-
-            var newPath = [];
-            var curLat;
-            var curLong;
-            for(var i = 0; i < newDocument.markers.length; i++) {
-                curLat = newDocument.markers[i].A;
-                curLong = newDocument.markers[i].F;
-                newPath.push(new google.maps.LatLng(curLat, curLong))
-            }
-            routePlan.setPath(newPath);
-            /*google.maps.event.addListener(routePlan, function(event) {
-                routePlan.setPath(newDocument);
-            });*/
-
-        },
-        removed: function(oldDocument) {
-        }
+    Tracker.autorun(function(){
+        // TODO draw new ploylines
+        console.log("Drawing new route path.");
+        var newPath = getRoutePlanPoints(getNewRoutePath());
+        routePlan.setPath(newPath);
     });
+
+    var bestRoute = [];
+    var bestRouteDep = new Tracker.Dependency;
+
+    var getBestRoutePath = function () {
+        routePathDep.depend();
+        return newRoutePath;
+    };
+
+    setBestRoutePath = function (newPath) {
+        console.log("New route path set.");
+        newRoutePath = newPath;
+        routePathDep.changed();
+    };
+
+    Tracker.autorun(function(){
+        // TODO Add markers.
+        console.log("Adding Markers.");
+        var bestPath = getRoutePlanPoints(getBestRoutePath());
+        //addMarkers(bestPath, this.mapInstance);
+        GoogleMaps.ready('optimizedroutemap', function (map) {
+            for (i = 0; i < bestPath.length; i++) {
+
+                var image = new google.maps.MarkerImage('img/marker' + (i + 1) + '.png',
+                    new google.maps.Size(20, 34),
+                    new google.maps.Point(0, 0),
+                    new google.maps.Point(10, 34));
+
+                var marker = new google.maps.Marker({
+                    position: bestPath[i],
+                    map: map.instance,
+                    icon: image
+                });
+            }
+        });
+    });
+
 });
 // End optimizedroute map onCreated.
+
+// TODO Rename function and add comments.
+function getRoutePlanPoints(newRoute){
+    var coordinates = [];
+
+    var arrLength = newRoute.length;
+    // Create Lat long Array.
+    for(i=0; i < arrLength; i++){
+        var curLat = newRoute[i].lat;
+        var curLong = newRoute[i].lng;
+        coordinates.push(new google.maps.LatLng(curLat, curLong));
+    }
+
+    return coordinates;
+}
 
 Template.routemaplayout.events( {
     // Go back to home.
@@ -107,41 +137,75 @@ Template.routemaplayout.events( {
     }
 });
 
+// TODO move to seperate place, add comments.
+
 Template.routemap.onRendered(function(){
     sAlert.info('Starting Simulated Annealing.', {effect: 'stackslide', position: 'top-right', timeout: '4000', onRouteClose: false, stack: true, offset: '80px'});
     // Start simulated annealing.
+
+    // Start spinner.
     NProgress.start();
-    simulatedAnnealing();
-    NProgress.done();
-});
 
-function addMarkers(routePlanCoordinates, map){
-    for(i = 0;  i < routePlanCoordinates.length; i++) {
+    // Check if test data.
+    var isTestData = Session.get("isTestData");
+    console.log("Is using test data: ", isTestData);
+    if((typeof isTestData !== 'undefined') && isTestData){
+        // TODO do this asynchronously.
+        if(TestLocations.find().count() < 1){
+            sAlert.info("Loading Test Data, might take few seconds for first time.", {effect: 'stackslide', position: 'top-right', timeout: '3000', onRouteClose: false, stack: true, offset: '80px'});
+            //NProgress.start();
+            Meteor.call('populateTestData', function(err, res){
+                if(err){
+                    console.log("Failed to populate test data");
+                }
+                else{
+                    console.log("Insert test data success.")
+                }
+            });
+        }
+        if(TestDistanceMatrix.find().count() < 1){
+            sAlert.info("Loading Test Data, might take few seconds for first time.", {effect: 'stackslide', position: 'top-right', timeout: '3000', onRouteClose: false, stack: true, offset: '80px'});
+            //NProgress.start();
+            Meteor.call('populateTestDistMatrixData', function(err, res){
+                if(err){
+                    console.log("Failed to populate test data");
+                }
+                else{
+                    console.log("Insert test data success.");
+                }
+            });
 
-        var image = new google.maps.MarkerImage('img/marker' + (i+1) + '.png',
-            new google.maps.Size(20, 34),
-            new google.maps.Point(0, 0),
-            new google.maps.Point(10, 34));
-
-        var marker = new google.maps.Marker({
-            position: routePlanCoordinates[i],
-            map: map.instance,
-            icon: image
-        });
+        }
+        // TODO Run Async or only after making sure data is present.
+        var testDistMatrix = TestDistanceMatrix.find({}, {sort: {pos: 1}}).fetch();
+        //console.log("testDistMatrix: ", testDistMatrix[0].distance_matrix);
+        var testLocations = TestLocations.find({}, {sort: {pos: 1}}).fetch();
+        //console.log("testLoc Length: ", testLocations.length);
+        startSimulatedAnnealing(testDistMatrix[0].distance_matrix, testLocations);
     }
-}
+    else{
+        // Run Simulated Annealing Asynchronously. It stops if calls to API fails.
+        runSimulatedAnnealingAsync();
+    }
 
-var lats = 0;
-var longs = 0;
+    // TODO move distance matrix functions to utils file.
+    // Get Distance Matrix Synchronously.
+
+    // TODO add markers from final return data.
+    //this.mapInstance;
+
+});
 function cityCoordinates(citiesArray, map){
     var coordinates = [];
+    var lats = 0;
+    var longs = 0;
 
     // TODO debug only, set sessions from seperate function if useful.
     var arrLength = citiesArray.length;
     // Create Lat long Array.
     for(i=0; i < arrLength; i++){
-        var curLat = citiesArray[i].latitude;
-        var curLong = citiesArray[i].longitude;
+        var curLat = citiesArray[i].lat;
+        var curLong = citiesArray[i].lng;
         coordinates.push(new google.maps.LatLng(curLat, curLong));
         lats += Number(curLat);
         longs += Number(curLong);

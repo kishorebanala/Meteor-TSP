@@ -20,8 +20,8 @@ Meteor.startup(function() {
         ].forEach(function (location, i) {
                 Cities.insert({
                     name: location.name,
-                    latitude: location.latitude,
-                    longitude: location.longitude,
+                    lat: location.latitude,
+                    lng: location.longitude,
                     pos: i
                 });
             }
@@ -51,8 +51,18 @@ Meteor.methods({
        console.log("Location %s removed.", item.name);
        collection.remove(item._id);
    },
-    updateMarkers: function( collectionName, planCoords ) {
-        var markerCollection = Mongo.Collection.get(collectionName);
-        markerCollection.update({}, {$set: {markers: planCoords}});
+    populateTestLocationsData: function() {
+        var data = JSON.parse(Assets.getText("testdata/GeoLocations.json"));
+        data.locations.forEach(function (item, index, array) {
+            TestLocations.insert(item);
+        });
+        console.log("Test Locations Data inserted");
+    },
+    populateTestDistMatrixData: function() {
+        var data = JSON.parse(Assets.getText("testdata/DistanceMatrix.json"));
+        TestDistanceMatrix.insert({
+            distance_matrix: data.distance_table
+        });
+        console.log("Test Locations Data inserted");
     }
 });

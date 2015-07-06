@@ -15,14 +15,7 @@ while(temperature > absTemperature){
 }
 */
 
-
-simulatedAnnealing = function () {
-    locationsArray = Cities.find({}, {sort: {pos: 1}}).fetch();
-    // Get distance matrix or fail operation.
-    getDistanceMatrix();
-}
-
-function startSimulatedAnnealing(distanceMatrix){
+startSimulatedAnnealing = function(distanceMatrix, locationsArray){
     if(distanceMatrix.length < 1){
         console.log("Failed to get Distance Matrix from APIs. Cancelling operation.");
         return false;
@@ -35,8 +28,8 @@ function startSimulatedAnnealing(distanceMatrix){
 
     console.log("Simulated Annealing started.");
 
-    var temperature = (locationsArrayLength * locationsArrayLength); // Change to number of cities times a constant.
-    var coolingRate = 0.9; // Determine this too from number of cities.
+    var temperature = Math.pow(2, locationsArrayLength);//(locationsArrayLength * locationsArrayLength); // Change to number of cities times a constant.
+    var coolingRate = 0.9995; // Determine this too from number of cities.
     var absoluteTemperature = 0.001; // Temperature we would like the system to cool down to.
     var nextRoute = [];
     var temp = [];
@@ -44,6 +37,8 @@ function startSimulatedAnnealing(distanceMatrix){
     var initialRoute = locationsArray.slice();                // Staring route passed by user.
     var currentBestRoute = initialRoute.slice();           // Best route so far.
     var currentBestRouteCost = routeCost(currentBestRoute, distanceMatrix);
+
+    var numberOfIterations = 0;
 
     while (temperature > absoluteTemperature) {
         /*
@@ -58,17 +53,20 @@ function startSimulatedAnnealing(distanceMatrix){
         var initialRouteCost = routeCost(initialRoute, distanceMatrix);
         var nextRouteCost = routeCost(nextRoute, distanceMatrix);
 
-        /*console.log("Initial Route cost: ", initialRouteCost);
-        console.log("Next rand route: ", nextRouteCost);*/
+        //console.log("Initial Route cost: ", initialRouteCost);
+        //console.log("Next rand route: ", nextRouteCost);
 
         // If it's better, then switch to it.
         var isLessThan = (Math.round(nextRouteCost) < Math.round(initialRouteCost));
         if(isLessThan) {
-            //console.log("Routes swapped");
+            //console.log("Next rand route: ", nextRouteCost);
             initialRoute = nextRoute;
 
-            var planCoords = getRoutePlanPath(initialRoute);
-            Meteor.call('updateMarkers', 'routemarkers', planCoords);
+            /*var planCoords = getRoutePlanPath(initialRoute);
+            Meteor.call('updateMarkers', 'routemarkers', planCoords);*/
+            // Alert Tracker Dependency.
+            //console.log("Initial Route: ", initialRoute);
+            setNewRoutePath(initialRoute);
 
             if(nextRouteCost < currentBestRouteCost) {
                 currentBestRoute = nextRoute;
@@ -82,11 +80,15 @@ function startSimulatedAnnealing(distanceMatrix){
 
         // Cool down the system.
         temperature *= coolingRate;
+        numberOfIterations += 1;
+        //console.log("Temp: ", temperature);
     }
+    console.log("Iter count: ", numberOfIterations);
     console.log("Best Route: ", currentBestRoute);
     console.log("Best Route Cost: ", currentBestRouteCost);
-    var finalCoords = getRoutePlanPath(currentBestRoute);
-    Meteor.call('updateMarkers', 'routemarkers', finalCoords);
+    // Draw markers with Tracker Dependency.
+    setBestRoutePath(currentBestRoute);
+
 }
 
 
@@ -192,13 +194,16 @@ maintenance and IP blocking for incorrect request format.
 
 */
 
-    function getDistanceMatrix() {
-        // Use OSRM Distance API to compute distance matrix.
+    // TODO pass in locations query.
+    runSimulatedAnnealingAsync = function() {
+        // FIXME Remove after debug
+        var locationsArray = Cities.find({}, {sort: {pos: 1}}).fetch();
         var locationsQuery = generateLocationsQuery(locationsArray, true); // Get query for MapQuest API as default.
+        var distMatrix = [];
 
         Meteor.call('fetchFromMapQuestDistanceAPI', locationsQuery, function (err, respJson) {
             if (err) {
-                getDistanceMatrixFromBackUpAPI();
+                getDistanceMatrixFromBackUpAPI(locationsArray);
                 var reason = "Error: " + err.reason;
                 sAlert.error(reason, {effect: 'stackslide', position: 'top-right', timeout: '5000', onRouteClose: false, stack: true, offset: '80px'});
                 sAlert.error("Failed to get data from MapQuest API. Trying with BackUp APIs.", {effect: 'stackslide', position: 'top-right', timeout: '5000', onRouteClose: false, stack: true, offset: '80px'});
@@ -206,49 +211,30 @@ maintenance and IP blocking for incorrect request format.
             } else {
                 console.log("Response JSON for MapQuest: ", respJson);
                 if(respJson.info.statuscode == Number(0)){
-                    var distMatrix = respJson.distance;
+                    distMatrix = respJson.distance;
                     console.log("All good at MQ: ", distMatrix);
-                    startSimulatedAnnealing(distMatrix);
+                    Session.set('isDistMatReady', true);
+                    NProgress.done();
+                    startSimulatedAnnealing(distMatrix, locationsArray);
                 }
                 else{
-                    getDistanceMatrixFromBackUpAPI();
+                    getDistanceMatrixFromBackUpAPI(locationsArray);
                     sAlert.error("Failed to get data from MapQuest API. Trying with BackUp APIs.", {effect: 'stackslide', position: 'top-right', timeout: '6000', onRouteClose: false, stack: true, offset: '80px'});
                     console.log("Failed to get data from MapQuest API. Trying with BackUp APIs.");
                 }
             }
         });
-        //NProgress.done();
-        /*var isErr = false;
-
-        var respJson = Meteor.call('fetchFromOSRMDistanceAPI', locationsQuery);
-        console.log("OSRM: ", respJson);
-        if(respJson == null){
-            isErr = true;
-        }
-        else{
-            if(respJson.info.statuscode != Number(0)){
-                isErr = true;
-                sAlert.error("Failed to get data from MapQuest API. Trying with BackUp APIs.", {effect: 'genie', position: 'top-right', timeout: '3000', onRouteClose: false, stack: false, offset: '80px'});
-                console.log("Failed to get data from MapQuest API. Trying with BackUp APIs.");
-            }
-            else{
-                distanceMatrix = respJson.distance;
-            }
-        }
-        if(isErr){
-            distanceMatrix = getDistanceMatrixFromBackUpAPI(locationsArray);
-        }*/
-    };
+    }
 
     // TODO generate different queries for locations more than 25, or if one of the api fails.
 
-    function generateLocationsQuery(isMapQuest){
+    function generateLocationsQuery(locationsArray, isMapQuest){
         var locationsQuery= "";
         if(isMapQuest){
             var arrLength = locationsArray.length;
             locationsQuery = "json={locations: [ ";
             for (i = 0; i < arrLength; i++) {
-                locationsQuery += "{latLng: {lat:" + locationsArray[i].latitude + ",lng:" + locationsArray[i].longitude + "}}";
+                locationsQuery += "{latLng: {lat:" + locationsArray[i].lat + ",lng:" + locationsArray[i].lng + "}}";
                 // Add coma at the end for each location except the last one. Works better than imploding array at minimal expense.
                 if(i != (arrLength-1)){
                     locationsQuery += ",";
@@ -258,22 +244,20 @@ maintenance and IP blocking for incorrect request format.
 
         }
         else {
-            /*
-             * Create locations query in OSRM format.
-             * Since there are at least two locations all the time, and zeroth loc in query doesn't has '&',
-             * Add zeroth manually instead of declaring blank var, and loop through to add rest.
-             */
-            locationsQuery = "loc=" + locationsArray[0].latitude + "," + locationsArray[0].longitude;
+             // Create locations query in OSRM format.
+             // Since there are at least two locations all the time, and zeroth loc in query doesn't has '&',
+             // Add zeroth manually instead of declaring blank var, and loop through to add rest.
+            locationsQuery = "loc=" + locationsArray[0].lat + "," + locationsArray[0].lng;
             var i;
             for (i = 1; i < locationsArray.length; i++) {
-                locationsQuery += "&loc=" + locationsArray[i].latitude + "," + locationsArray[i].longitude;
+                locationsQuery += "&loc=" + locationsArray[i].lat + "," + locationsArray[i].lng;
             }
         }
 
         return locationsQuery;
     }
 
-    function getDistanceMatrixFromBackUpAPI(){
+    function getDistanceMatrixFromBackUpAPI(locationsArray){
         var locationsQuery = generateLocationsQuery(locationsArray, false); // This Query is not for default MapQuest API.
         Meteor.call('fetchFromOSRMDistanceAPI', locationsQuery, function (err, respJson) {
             if (err) {
@@ -284,50 +268,13 @@ maintenance and IP blocking for incorrect request format.
             } else {
                 if(respJson != null && respJson.distance_table != null){
                     console.log("Query successful from OSRM", respJson.distance_table);
-                    Session.set("distanceMatrix", respJson.distance_table);
-                    distanceMatrixReady.set(true);
+                    startSimulatedAnnealing(respJson.distance_table, locationsArray);
                 }
                 else {
                     console.log("error occured on receiving data on fetchFromOSRMDistanceAPI. ");
                     sAlert.error("Failed to get data from Backup APIs too, May be try again later?.", {effect: 'stackslide', position: 'top-right', timeout: 'none', onRouteClose: false, stack: true, offset: '80px'});
                 }
             }
+            NProgress.done();
         });
-    }
-
-    function getRoutePlanPath(initialRoute){
-        var coordinates = [];
-
-        // TODO debug only, set sessions from seperate function if useful.
-        var arrLength = initialRoute.length;
-        // Create Lat long Array.
-        for(i=0; i < arrLength; i++){
-            var curLat = initialRoute[i].latitude;
-            var curLong = initialRoute[i].longitude;
-            coordinates.push(new google.maps.LatLng(curLat, curLong));
-        }
-
-        return coordinates;
-    }
-
-    function drawOnMap(planCoords){
-        console.log("Drawing new map.");
-        GoogleMaps.ready('optimizedroutemap', function (map) {
-            googleMap = map.instance;
-            //addMarkers(routePlanCoordinates, map);        // Add Markers.
-            var routePlan = new google.maps.Polyline({    // Draw poly lines.
-                geodesic: true,
-                strokeColor: '#FF8080',
-                strokeOpacity: 0.8,
-                strokeWeight: 4,
-                map: map.instance
-            });
-            routePlan.setPath(planCoords);
-        });
-    }
-
-    function distance(city1, city2){
-        var distanceMatrix  = Session.get("distanceMatrixKey");
-        // TODO Check numberic values of city1 and city2;
-        return distanceMatrix[city1][city2];
     }
