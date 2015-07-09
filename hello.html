@@ -1,0 +1,45 @@
+<head>
+    <title>Travelling Salesman Problem</title>
+    <meta name="viewport" content="width=device-width, user-scalable=no">
+    <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600' rel='stylesheet' type='text/css'>
+</head>
+
+<body>
+<div class="outer">
+    <div class="logo"></div>
+    <h1 class="title">Route Optimizer</h1>
+    <div class="subtitle">with Travelling Salesman Problem</div>
+    {{> leaderboard}}
+</div>
+</body>
+
+<template name="leaderboard">
+    <ol class="leaderboard">
+        {{#each cities}}
+            {{> city}}
+        {{/each}}
+    </ol>
+
+    <form class="new-task">
+        <button class="add">+</button>
+        <input type="text" name="text" placeholder="Enter City name or Zipcode" />
+    </form>
+
+    <div class="submit">
+        <button class="request">Find Optimal Route</button>
+    </div>
+
+</template>
+
+<template name="city">
+    <li class="city {{selected}}">
+        <span class="name">{{name}}</span>
+        <button class="delete">&times;</button>
+    </li>
+</template>
+
+<template name="map">
+    <div class="map-container">
+        {{> googleMap name="exampleMap" options=exampleMapOptions}}
+    </div>
+</template>

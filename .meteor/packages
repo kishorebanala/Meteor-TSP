@@ -7,12 +7,6 @@
 meteor-platform
 autopublish
 insecure
+dburles:google-maps
 iron:router
 http
-dburles:google-maps
-rubaxa:sortable
-mike:mocha
-juliancwirko:s-alert
-reactive-var
-juliancwirko:s-alert-stackslide
-mrt:nprogress
